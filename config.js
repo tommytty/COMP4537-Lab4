@@ -1,15 +1,10 @@
-
-export const dbConfig = {
-  admin: {
-    host: '...',
-    user: 'lab5_admin',
-    password: 'admin',
-    database: '...',
-  },
-  reader: {
-    host: '...',
-    user: 'lab5_reader',
-    password: 'reader',
-    database: '...',
-  },
+const dbCredentials = {
+  host: 'localhost', // or your host IP
+  database: 'dbserver',
+  adminUser: 'admin',
+  adminPass: 'admin',
+  readerUser: 'reader',
+  readerPass: 'reader',
 };
+
+module.exports = dbCredentials;
