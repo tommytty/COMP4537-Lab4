@@ -1,0 +1,146 @@
+* {
+  box-sizing: border-box;
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+}
+
+body {
+  margin: 0;
+  height: 100vh;
+  background: radial-gradient(circle at top, #0f2a1f, #050806);
+  color: #e8fff2;
+}
+
+/* INSERT BUTTON (top right) */
+.insert-btn {
+  position: absolute;
+  top: 24px;
+  right: 24px;
+  padding: 14px 22px;
+  font-size: 16px;
+  font-weight: 600;
+  border-radius: 12px;
+  border: none;
+  cursor: pointer;
+  background: linear-gradient(135deg, #1aff8c, #00b35f);
+  color: #062b18;
+  box-shadow: 0 8px 24px rgba(0, 255, 150, 0.25);
+}
+
+.insert-btn:hover {
+  transform: translateY(-1px);
+}
+
+/* CENTER CONTAINER */
+.center {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: min(700px, 90%);
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+textarea {
+  width: 100%;
+  height: 140px;
+  padding: 16px;
+  font-size: 15px;
+  border-radius: 14px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(10, 20, 15, 0.75);
+  color: #eafff4;
+  resize: none;
+  outline: none;
+  box-shadow: inset 0 0 0 1px rgba(0, 255, 140, 0.08);
+}
+
+textarea::placeholder {
+  color: rgba(230, 255, 240, 0.35);
+}
+
+/* SUBMIT BUTTON */
+.submit-btn {
+  align-self: center;
+  padding: 12px 28px;
+  font-size: 15px;
+  font-weight: 600;
+  border-radius: 12px;
+  border: 1px solid rgba(0, 255, 150, 0.25);
+  background: rgba(0, 255, 150, 0.12);
+  color: #b9ffe1;
+  cursor: pointer;
+}
+
+.submit-btn:hover {
+  background: rgba(0, 255, 150, 0.18);
+}
+
+/* TITLE */
+.title {
+  position: absolute;
+  top: 30%;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 28px;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+  color: rgba(220, 255, 240, 0.9);
+}
+
+/* MODAL (hidden by default) */
+.modal-backdrop {
+  position: fixed;
+  inset: 0;
+  display: none; /* hidden until opened */
+  align-items: center;
+  justify-content: center;
+  background: rgba(0, 0, 0, 0.55);
+  backdrop-filter: blur(6px);
+  z-index: 9999;
+}
+
+.modal-backdrop.open {
+  display: flex;
+}
+
+.modal {
+  width: min(860px, 92vw);
+  max-height: min(70vh, 600px);
+  overflow: hidden;
+  border-radius: 16px;
+  border: 1px solid rgba(0, 255, 150, 0.18);
+  background: rgba(8, 18, 14, 0.92);
+  box-shadow: 0 18px 60px rgba(0, 0, 0, 0.55);
+  position: relative;
+}
+
+.modal-close {
+  position: absolute;
+  top: 10px;
+  right: 12px;
+  width: 38px;
+  height: 38px;
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.10);
+  background: rgba(255, 255, 255, 0.06);
+  color: rgba(230, 255, 240, 0.9);
+  font-size: 22px;
+  cursor: pointer;
+}
+
+.modal-close:hover {
+  background: rgba(255, 255, 255, 0.10);
+}
+
+.modal-content {
+  margin: 0;
+  padding: 56px 18px 18px 18px; /* top space for close button */
+  color: rgba(230, 255, 240, 0.92);
+  font-size: 14px;
+  line-height: 1.5;
+  white-space: pre-wrap;
+  overflow: auto;
+  max-height: min(70vh, 600px);
+}

@@ -1,0 +1,30 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Lab 4</title>
+  <link rel="stylesheet" href="/style.css" />
+</head>
+
+<body>
+
+  <button class="insert-btn" id="insertBtn">Insert</button>
+    <div class="title">Query DB</div>
+  <div class="center">
+    <textarea
+      id="sqlBox"
+      placeholder="SELECT * FROM Patient;"
+    ></textarea>
+    <button class="submit-btn" id="submitBtn">Submit</button>
+  </div>
+
+  <div class="modal-backdrop" id="modalBackdrop" aria-hidden="true">
+    <div class="modal" role="dialog" aria-modal="true">
+      <button class="modal-close" id="modalCloseBtn" aria-label="Close">×</button>
+      <pre class="modal-content" id="modalContent"></pre>
+    </div>
+  </div>
+
+  <script src="/script.js"></script>
+</body>
+</html>
