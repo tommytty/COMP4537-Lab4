@@ -16,19 +16,29 @@ INSERT INTO patient (name, dateOfBirth) VALUES
 ('Jack Ma', '1961-01-30'),
 ('Elon Musk Jr.', '1999-01-01');`;
 
+/**
+ * Security check to enforce Principle of Least Privilege on the server side.
+ * Ensures only SELECT statements are executed from the text area.
+ */
 function isQuerySafe(sql) {
   if (!sql) return false;
   const forbidden = ['DROP', 'DELETE', 'UPDATE', 'CREATE', 'ALTER', 'TRUNCATE'];
   const decoded = decodeURIComponent(sql).toUpperCase().trim();
+
+  // Requirement: Only allow queries starting with SELECT
   if (!decoded.startsWith('SELECT')) return false;
+
+  // Requirement: Ensure no harmful statements are present
   return !forbidden.some((word) => decoded.includes(word));
 }
 
 const server = http.createServer(async (req, res) => {
+  // CORS Headers: Critical for Server 1 (Origin 1) to communicate with this server (Origin 2)
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
 
+  // Handle Preflight OPTIONS request
   if (req.method === 'OPTIONS') {
     res.writeHead(204);
     res.end();
@@ -37,11 +47,18 @@ const server = http.createServer(async (req, res) => {
 
   const url = new URL(req.url, `http://${req.headers.host}`);
 
+  // Health Check for Render/Railway deployment success
+  if (url.pathname === '/') {
+    res.writeHead(200, { 'Content-Type': 'text/plain' });
+    res.end('Server 2 is active and healthy.');
+    return;
+  }
+
   // --- HANDLE POST (INSERT) ---
   if (req.method === 'POST' && url.pathname.includes('/insert')) {
     let connection;
     try {
-      // Use ADMIN credentials for table creation and insertion
+      // Use Admin/Write credentials for table creation and insertion
       connection = await mysql.createConnection({
         host: dbConfig.host,
         user: dbConfig.adminUser,
@@ -50,7 +67,10 @@ const server = http.createServer(async (req, res) => {
         port: dbConfig.dbPort || 3306,
       });
 
+      // Requirement: Check if table exists every time button is pressed
       await connection.query(createTableQuery);
+
+      // Requirement: Table grows multiple times if button is pressed
       await connection.query(insertPatientsQuery);
 
       res.writeHead(200, { 'Content-Type': 'application/json' });
@@ -70,6 +90,7 @@ const server = http.createServer(async (req, res) => {
 
   // --- HANDLE GET (SELECT) ---
   if (req.method === 'GET' && url.pathname.includes('/api/v1/sql/')) {
+    // Extract everything after the specific API path
     const rawQuery = url.pathname.split('/api/v1/sql/')[1];
 
     if (!isQuerySafe(rawQuery)) {
@@ -83,7 +104,8 @@ const server = http.createServer(async (req, res) => {
     let connection;
     try {
       const sqlQuery = decodeURIComponent(rawQuery);
-      // Use RESTRICTED credentials for user-submitted queries
+
+      // Requirement: Use restricted/read-only credentials for user SQL queries
       connection = await mysql.createConnection({
         host: dbConfig.host,
         user: dbConfig.readerUser,
@@ -105,17 +127,18 @@ const server = http.createServer(async (req, res) => {
   }
 
   res.writeHead(404);
-  res.end('Not Found');
+  res.end('Route Not Found');
 });
 
-// FIXED PORT: Don't use 3306 as a fallback for the web server!
+// Use Render/Railway's dynamic port or default to 3000
 const PORT = process.env.PORT || 3000;
 server.listen(PORT, '0.0.0.0', () => {
-  console.log(`Server 2 is live on port ${PORT}`);
+  console.log(`Server 2 is live and listening on port ${PORT}`);
 });
 
+// Graceful Shutdown to free up the port correctly
 const gracefulShutdown = async () => {
-  console.log('\nShutting down...');
+  console.log('\nShutting down server...');
   server.close(() => {
     process.exit(0);
   });

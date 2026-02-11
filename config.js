@@ -7,3 +7,16 @@ module.exports = {
   database: process.env.MYSQLDATABASE || 'patient',
   port: process.env.MYSQLPORT || 3306,
 };
+
+/**
+ * For admin and user
+  module.exports = {
+  host: process.env.MYSQLHOST || 'localhost',
+  database: process.env.MYSQLDATABASE || 'dbserver',
+  adminUser: process.env.MYSQLUSER || 'root',
+  adminPass: process.env.MYSQLPASSWORD || '',
+  readerUser: process.env.MYSQLUSER || 'root',
+  readerPass: process.env.MYSQLPASSWORD || '',
+  dbPort: process.env.MYSQLPORT || 3306
+};
+ */
