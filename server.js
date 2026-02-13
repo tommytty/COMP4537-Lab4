@@ -1,26 +1,147 @@
 const http = require('http');
+const mysql = require('mysql2/promise');
+const dbConfig = require('./config');
 
-const server = http.createServer((req, res) => {
-  // 1. Set CORS Headers (Pre-emptively allow all or a placeholder)
+const createTableQuery = `
+CREATE TABLE IF NOT EXISTS patient (
+    patientid INT(11) AUTO_INCREMENT PRIMARY KEY,
+    name VARCHAR(100),
+    dateOfBirth DATETIME
+) ENGINE=InnoDB;`;
+
+const insertPatientsQuery = `
+INSERT INTO patient (name, dateOfBirth) VALUES 
+('Sara Brown', '1901-01-01'),
+('John Smith', '1941-01-01'),
+('Jack Ma', '1961-01-30'),
+('Elon Musk Jr.', '1999-01-01');`;
+
+/**
+ * Security check to enforce Principle of Least Privilege on the server side.
+ * Ensures only SELECT statements are executed from the text area.
+ */
+function isQuerySafe(sql) {
+  if (!sql) return false;
+  const forbidden = ['DROP', 'DELETE', 'UPDATE', 'CREATE', 'ALTER', 'TRUNCATE'];
+  const decoded = decodeURIComponent(sql).toUpperCase().trim();
+
+  // Requirement: Only allow queries starting with SELECT
+  if (!decoded.startsWith('SELECT')) return false;
+
+  // Requirement: Ensure no harmful statements are present
+  return !forbidden.some((word) => decoded.includes(word));
+}
+
+const server = http.createServer(async (req, res) => {
+  // CORS Headers: Critical for Server 1 (Origin 1) to communicate with this server (Origin 2)
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
 
-  // 2. Handle Preflight OPTIONS request
+  // Handle Preflight OPTIONS request
   if (req.method === 'OPTIONS') {
     res.writeHead(204);
     res.end();
     return;
   }
 
-  // 3. Simple Routing Logic
   const url = new URL(req.url, `http://${req.headers.host}`);
 
-  if (req.method === 'POST' && url.pathname.includes('/insert')) {
-    // Task: Check/Create table & Insert rows here
-  } else if (req.method === 'GET' && url.pathname.includes('/api/v1/sql/')) {
-    // Task: Execute SELECT query with restricted user
+  // Health Check for Render/Railway deployment success
+  if (url.pathname === '/') {
+    res.writeHead(200, { 'Content-Type': 'text/plain' });
+    res.end('Server 2 is active and healthy.');
+    return;
   }
+
+  // --- HANDLE POST (INSERT) ---
+  if (req.method === 'POST' && url.pathname.includes('/insert')) {
+    let connection;
+    try {
+      // Use Admin/Write credentials for table creation and insertion
+      connection = await mysql.createConnection({
+        host: dbConfig.host,
+        user: dbConfig.adminUser,
+        password: dbConfig.adminPass,
+        database: dbConfig.database,
+        port: dbConfig.dbPort || 3306,
+      });
+
+      // Requirement: Check if table exists every time button is pressed
+      await connection.query(createTableQuery);
+
+      // Requirement: Table grows multiple times if button is pressed
+      await connection.query(insertPatientsQuery);
+
+      res.writeHead(200, { 'Content-Type': 'application/json' });
+      res.end(
+        JSON.stringify({
+          message: 'Table checked/created and 4 patients inserted!',
+        }),
+      );
+    } catch (err) {
+      res.writeHead(500, { 'Content-Type': 'application/json' });
+      res.end(JSON.stringify({ error: err.message }));
+    } finally {
+      if (connection) await connection.end();
+    }
+    return;
+  }
+
+  // --- HANDLE GET (SELECT) ---
+  if (req.method === 'GET' && url.pathname.includes('/api/v1/sql/')) {
+    // Extract everything after the specific API path
+    const rawQuery = url.pathname.split('/api/v1/sql/')[1];
+
+    if (!isQuerySafe(rawQuery)) {
+      res.writeHead(403, { 'Content-Type': 'application/json' });
+      res.end(
+        JSON.stringify({ error: 'Permission Denied: Only SELECT allowed.' }),
+      );
+      return;
+    }
+
+    let connection;
+    try {
+      const sqlQuery = decodeURIComponent(rawQuery);
+
+      // Requirement: Use restricted/read-only credentials for user SQL queries
+      connection = await mysql.createConnection({
+        host: dbConfig.host,
+        user: dbConfig.readerUser,
+        password: dbConfig.readerPass,
+        database: dbConfig.database,
+        port: dbConfig.dbPort || 3306,
+      });
+
+      const [rows] = await connection.execute(sqlQuery);
+      res.writeHead(200, { 'Content-Type': 'application/json' });
+      res.end(JSON.stringify(rows));
+    } catch (err) {
+      res.writeHead(500, { 'Content-Type': 'application/json' });
+      res.end(JSON.stringify({ error: err.message }));
+    } finally {
+      if (connection) await connection.end();
+    }
+    return;
+  }
+
+  res.writeHead(404);
+  res.end('Route Not Found');
 });
 
-server.listen(8080, () => console.log('Server 2 running on port 8080'));
+// Use Render/Railway's dynamic port or default to 3000
+const PORT = process.env.PORT || 3000;
+server.listen(PORT, '0.0.0.0', () => {
+  console.log(`Server 2 is live and listening on port ${PORT}`);
+});
+
+// Graceful Shutdown to free up the port correctly
+const gracefulShutdown = async () => {
+  console.log('\nShutting down server...');
+  server.close(() => {
+    process.exit(0);
+  });
+};
+process.on('SIGINT', gracefulShutdown);
+process.on('SIGTERM', gracefulShutdown);
