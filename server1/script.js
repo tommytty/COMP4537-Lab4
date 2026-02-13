@@ -1,5 +1,5 @@
-// CHANGE THIS later to your partner’s Server2 origin
-const API_BASE = "http://localhost:3001";
+
+const API_BASE = "https://api-db-c97g.onrender.com";
 
 const insertBtn = document.getElementById("insertBtn");
 const submitBtn = document.getElementById("submitBtn");
