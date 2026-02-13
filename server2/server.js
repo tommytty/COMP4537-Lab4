@@ -1,33 +1,26 @@
+//AI-powered
+
 const http = require("http");
 const mysql = require("mysql2/promise");
 const { URL } = require("url");
 
-// =======================
-// CONFIG (use env vars)
-// =======================
 const PORT = process.env.PORT || 3001;
 
-// IMPORTANT: set this to your Server1 origin (Netlify/Vercel/GitHub Pages URL)
-// For local testing you can keep * (but for deployment, set the real origin)
+
 const ALLOWED_ORIGIN = process.env.ALLOWED_ORIGIN || "*";
 
-// Railway public proxy host/port:
 const DB_HOST = process.env.DB_HOST || "maglev.proxy.rlwy.net";
 const DB_PORT = Number(process.env.DB_PORT || 30731);
 
-// Write user (table create + inserts)
 const DB_WRITE_USER = process.env.DB_WRITE_USER || "root";
 const DB_WRITE_PASS = process.env.DB_WRITE_PASS || "";
 const DB_NAME = process.env.DB_NAME || "railway";
 
-// Read-only user (SELECT only)
 const DB_READ_USER = process.env.DB_READ_USER || "readonly_user";
 const DB_READ_PASS = process.env.DB_READ_PASS || "";
 
-// Railway typically needs TLS on public proxy
 const DB_SSL = { rejectUnauthorized: false };
 
-// Your lab’s fixed insert rows:
 const SEED_ROWS = [
   ["Sara Brown", "1901-01-01"],
   ["John Smith", "1941-01-01"],
@@ -35,9 +28,6 @@ const SEED_ROWS = [
   ["Elon Musk", "1999-01-01"],
 ];
 
-// =======================
-// DB helpers
-// =======================
 async function getWriteConn() {
   return mysql.createConnection({
     host: DB_HOST,
@@ -60,7 +50,6 @@ async function getReadConn() {
   });
 }
 
-// Creates table if it doesn't exist (Engine=InnoDB)
 async function ensurePatientTableExists(conn) {
   const createSql = `
     CREATE TABLE IF NOT EXISTS patient (
@@ -73,9 +62,6 @@ async function ensurePatientTableExists(conn) {
   await conn.execute(createSql);
 }
 
-// =======================
-// HTTP helpers
-// =======================
 function sendJson(res, statusCode, obj) {
   const body = JSON.stringify(obj, null, 2);
   res.writeHead(statusCode, {
@@ -91,8 +77,6 @@ function sendText(res, statusCode, text) {
 }
 
 function setCors(res, req) {
-  // If you set ALLOWED_ORIGIN to a specific origin, reflect it.
-  // If it's "*", just use "*".
   const origin = req.headers.origin;
   const allow =
     ALLOWED_ORIGIN === "*"
@@ -107,14 +91,11 @@ function setCors(res, req) {
   res.setHeader("Access-Control-Allow-Headers", "Content-Type");
 }
 
-// Basic SQL safety: allow SELECT only
 function isSelectOnly(sql) {
   const s = sql.trim().toLowerCase();
 
-  // Must start with select
   if (!s.startsWith("select")) return false;
 
-  // Block common write/ddl keywords anywhere
   const blocked = [
     "insert",
     "update",
@@ -136,13 +117,9 @@ function isSelectOnly(sql) {
   return !blocked.some((kw) => s.includes(kw));
 }
 
-// =======================
-// Server routes
-// =======================
 const server = http.createServer(async (req, res) => {
   setCors(res, req);
 
-  // Preflight
   if (req.method === "OPTIONS") {
     res.writeHead(204);
     return res.end();
@@ -180,7 +157,6 @@ const server = http.createServer(async (req, res) => {
     }
 
     // GET /api/v1/sql/<encoded sql>
-    // Your client already calls this format :contentReference[oaicite:1]{index=1}
     if (req.method === "GET" && path.startsWith("/api/v1/sql/")) {
       const encoded = path.slice("/api/v1/sql/".length);
       const sql = decodeURIComponent(encoded);

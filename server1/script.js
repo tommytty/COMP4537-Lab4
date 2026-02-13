@@ -1,4 +1,4 @@
-
+//AI-Powered
 const API_BASE = "https://api-db-c97g.onrender.com";
 
 const insertBtn = document.getElementById("insertBtn");
