@@ -1,5 +1,5 @@
 // CHANGE THIS later to your partner’s Server2 origin
-const API_BASE = "http://127.0.0.1:3001";
+const API_BASE = "http://localhost:3001";
 
 const insertBtn = document.getElementById("insertBtn");
 const submitBtn = document.getElementById("submitBtn");
@@ -33,31 +33,30 @@ document.addEventListener("keydown", (e) => {
 // POST → insert rows
 insertBtn.addEventListener("click", async () => {
   try {
-    await fetch(`${API_BASE}/insert`, { method: "POST" });
+    const res = await fetch(`${API_BASE}/insert`, { method: "POST" });
+    const data = await res.json();
+    openModal(JSON.stringify(data, null, 2));
   } catch (err) {
-    console.error("Insert failed:", err);
+    openModal("Insert failed: " + err);
   }
 });
+
 
 // GET → run SELECT query (FOR NOW: mock result popup)
 submitBtn.addEventListener("click", async () => {
   const sql = sqlBox.value.trim();
   if (!sql) return;
 
-  // ✅ MOCK RESPONSE (for testing UI)
-  const fake = {
-    ok: true,
-    query: sql,
-    rows: [
-      { patientId: 1, name: "Tom", age: 20 },
-      { patientId: 2, name: "Jane", age: 31 }
-    ]
-  };
-
-  openModal(JSON.stringify(fake, null, 2));
+  try {
+    const res = await fetch(`${API_BASE}/api/v1/sql/${encodeURIComponent(sql)}`);
+    const data = await res.json();
+    openModal(JSON.stringify(data, null, 2));
+  } catch (err) {
+    openModal("Query failed: " + err);
+  }
+});
 
   // Later (real call), you will replace the mock above with:
   // const res = await fetch(`${API_BASE}/query?sql=${encodeURIComponent(sql)}`);
   // const text = await res.text(); // or res.json()
-  // openModal(text);
-});
+  // openModal(text)
