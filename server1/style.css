@@ -1,103 +1,197 @@
-/* AI Powered */
-* {
+/*
+ * style.css — Server1 client styles
+ * Lab 5: Patient DB
+ *
+ * Attribution: Initial layout scaffolding assisted by ChatGPT (OpenAI);
+ * substantially revised and restructured by the development team.
+ */
+
+/* ─── Custom Properties ──────────────────────────────────────────────────── */
+:root {
+  --clr-bg-start:        #0f2a1f;
+  --clr-bg-end:          #050806;
+
+  --clr-accent:          #1aff8c;
+  --clr-accent-mid:      #00b35f;
+  --clr-accent-faint:    rgba(0, 255, 150, 0.12);
+  --clr-accent-border:   rgba(0, 255, 150, 0.25);
+  --clr-accent-glow:     rgba(0, 255, 150, 0.25);
+
+  --clr-text:            #e8fff2;
+  --clr-text-muted:      rgba(230, 255, 240, 0.92);
+  --clr-text-faint:      rgba(230, 255, 240, 0.35);
+
+  --clr-surface:         rgba(10, 20, 15, 0.75);
+  --clr-modal-bg:        rgba(8, 18, 14, 0.92);
+  --clr-overlay:         rgba(0, 0, 0, 0.55);
+
+  --clr-btn-text:        #062b18;
+
+  --radius-sm:    10px;
+  --radius-md:    12px;
+  --radius-lg:    14px;
+  --radius-xl:    16px;
+
+  --shadow-insert: 0 8px 24px var(--clr-accent-glow);
+  --shadow-modal:  0 18px 60px rgba(0, 0, 0, 0.55);
+}
+
+/* ─── Reset / Base ───────────────────────────────────────────────────────── */
+*,
+*::before,
+*::after {
   box-sizing: border-box;
-  font-family: system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
 }
 
 body {
   margin: 0;
-  height: 100vh;
-  background: radial-gradient(circle at top, #0f2a1f, #050806);
-  color: #e8fff2;
+  min-height: 100vh;
+  background: radial-gradient(circle at top, var(--clr-bg-start), var(--clr-bg-end));
+  color: var(--clr-text);
+  font-family: "Courier New", Courier, monospace;
 }
 
-/* INSERT BUTTON (top right) */
-.insert-btn {
+/* Screen-reader only utility */
+.sr-only {
   position: absolute;
-  top: 24px;
-  right: 24px;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* ─── Page Header ────────────────────────────────────────────────────────── */
+.page-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 20px 24px;
+}
+
+.site-title {
+  margin: 0;
+  font-size: 20px;
+  font-weight: 700;
+  letter-spacing: 1px;
+  color: var(--clr-text);
+  text-transform: uppercase;
+  opacity: 0.6;
+}
+
+/* ─── Insert Button ──────────────────────────────────────────────────────── */
+.insert-btn {
   padding: 14px 22px;
   font-size: 16px;
   font-weight: 600;
-  border-radius: 12px;
+  border-radius: var(--radius-md);
   border: none;
   cursor: pointer;
-  background: linear-gradient(135deg, #1aff8c, #00b35f);
-  color: #062b18;
-  box-shadow: 0 8px 24px rgba(0, 255, 150, 0.25);
+  background: linear-gradient(135deg, var(--clr-accent), var(--clr-accent-mid));
+  color: var(--clr-btn-text);
+  box-shadow: var(--shadow-insert);
+  transition: transform 0.15s ease, opacity 0.15s ease;
 }
 
-.insert-btn:hover {
+.insert-btn:hover:not(:disabled) {
   transform: translateY(-1px);
 }
 
-/* CENTER CONTAINER */
-.center {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  width: min(700px, 90%);
+.insert-btn:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+/* ─── Main Content ───────────────────────────────────────────────────────── */
+.main-content {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: calc(100vh - 80px);
+}
+
+/* ─── Query Section ──────────────────────────────────────────────────────── */
+.query-section {
+  width: min(700px, 90vw);
   display: flex;
   flex-direction: column;
   gap: 14px;
 }
 
+.query-heading {
+  margin: 0 0 4px;
+  font-size: 28px;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+  color: rgba(220, 255, 240, 0.9);
+  text-align: center;
+}
+
+.query-hint {
+  margin: 0;
+  font-size: 12px;
+  color: var(--clr-text-faint);
+  text-align: center;
+}
+
+/* ─── Textarea ───────────────────────────────────────────────────────────── */
 textarea {
   width: 100%;
   height: 140px;
   padding: 16px;
   font-size: 15px;
-  border-radius: 14px;
+  font-family: "Courier New", Courier, monospace;
+  border-radius: var(--radius-lg);
   border: 1px solid rgba(255, 255, 255, 0.08);
-  background: rgba(10, 20, 15, 0.75);
+  background: var(--clr-surface);
   color: #eafff4;
-  resize: none;
+  resize: vertical;
   outline: none;
   box-shadow: inset 0 0 0 1px rgba(0, 255, 140, 0.08);
+  transition: border-color 0.2s ease;
+}
+
+textarea:focus {
+  border-color: var(--clr-accent-border);
 }
 
 textarea::placeholder {
-  color: rgba(230, 255, 240, 0.35);
+  color: var(--clr-text-faint);
 }
 
-/* SUBMIT BUTTON */
+/* ─── Submit Button ──────────────────────────────────────────────────────── */
 .submit-btn {
   align-self: center;
   padding: 12px 28px;
   font-size: 15px;
   font-weight: 600;
-  border-radius: 12px;
-  border: 1px solid rgba(0, 255, 150, 0.25);
-  background: rgba(0, 255, 150, 0.12);
+  border-radius: var(--radius-md);
+  border: 1px solid var(--clr-accent-border);
+  background: var(--clr-accent-faint);
   color: #b9ffe1;
   cursor: pointer;
+  transition: background 0.15s ease, opacity 0.15s ease;
 }
 
-.submit-btn:hover {
+.submit-btn:hover:not(:disabled) {
   background: rgba(0, 255, 150, 0.18);
 }
 
-/* TITLE */
-.title {
-  position: absolute;
-  top: 30%;
-  left: 50%;
-  transform: translateX(-50%);
-  font-size: 28px;
-  font-weight: 600;
-  letter-spacing: 0.5px;
-  color: rgba(220, 255, 240, 0.9);
+.submit-btn:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
 }
 
-/* MODAL (hidden by default) */
+/* ─── Modal Backdrop ─────────────────────────────────────────────────────── */
 .modal-backdrop {
   position: fixed;
   inset: 0;
-  display: none; /* hidden until opened */
+  display: none;
   align-items: center;
   justify-content: center;
-  background: rgba(0, 0, 0, 0.55);
+  background: var(--clr-overlay);
   backdrop-filter: blur(6px);
   z-index: 9999;
 }
@@ -106,14 +200,15 @@ textarea::placeholder {
   display: flex;
 }
 
+/* ─── Modal ──────────────────────────────────────────────────────────────── */
 .modal {
   width: min(860px, 92vw);
   max-height: min(70vh, 600px);
   overflow: hidden;
-  border-radius: 16px;
+  border-radius: var(--radius-xl);
   border: 1px solid rgba(0, 255, 150, 0.18);
-  background: rgba(8, 18, 14, 0.92);
-  box-shadow: 0 18px 60px rgba(0, 0, 0, 0.55);
+  background: var(--clr-modal-bg);
+  box-shadow: var(--shadow-modal);
   position: relative;
 }
 
@@ -123,12 +218,14 @@ textarea::placeholder {
   right: 12px;
   width: 38px;
   height: 38px;
-  border-radius: 12px;
+  border-radius: var(--radius-sm);
   border: 1px solid rgba(255, 255, 255, 0.10);
   background: rgba(255, 255, 255, 0.06);
   color: rgba(230, 255, 240, 0.9);
   font-size: 22px;
   cursor: pointer;
+  transition: 0.15s ease;
+  line-height: 1;
 }
 
 .modal-close:hover {
@@ -137,11 +234,13 @@ textarea::placeholder {
 
 .modal-content {
   margin: 0;
-  padding: 56px 18px 18px 18px; /* top space for close button */
-  color: rgba(230, 255, 240, 0.92);
+  padding: 56px 18px 18px;
+  color: var(--clr-text-muted);
+  font-family: "Courier New", Courier, monospace;
   font-size: 14px;
-  line-height: 1.5;
+  line-height: 1.6;
   white-space: pre-wrap;
+  word-break: break-word;
   overflow: auto;
   max-height: min(70vh, 600px);
 }
