@@ -2,29 +2,65 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>Lab 4</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <!--
+    Page title is set at runtime by I18nService from LANG_EN.page_title.
+    The fallback value here is intentionally minimal.
+  -->
+  <title>Lab 5</title>
   <link rel="stylesheet" href="style.css" />
 </head>
 
 <body>
 
-  <button class="insert-btn" id="insertBtn">Insert</button>
-    <div class="title">Query DB</div>
-  <div class="center">
-    <textarea
-      id="sqlBox"
-      placeholder="SELECT * FROM Patient;"
-    ></textarea>
-    <button class="submit-btn" id="submitBtn">Submit</button>
-  </div>
+  <header class="page-header">
+    <!--
+      All visible text, placeholders, and aria attributes are set at
+      runtime by I18nService. Hardcoded strings have been removed so
+      that swapping lang/en/en.js for another locale file is sufficient
+      to fully translate the page.
+    -->
+    <h1 class="site-title" id="siteTitle"></h1>
+    <button class="insert-btn" id="insertBtn"></button>
+  </header>
 
-  <div class="modal-backdrop" id="modalBackdrop" aria-hidden="true">
-    <div class="modal" role="dialog" aria-modal="true">
-      <button class="modal-close" id="modalCloseBtn" aria-label="Close">×</button>
-      <pre class="modal-content" id="modalContent"></pre>
+  <main class="main-content">
+    <section class="query-section" aria-labelledby="queryHeading">
+      <h2 class="query-heading" id="queryHeading"></h2>
+
+      <label class="sr-only" for="sqlBox">SQL SELECT statement</label>
+      <textarea
+        id="sqlBox"
+        spellcheck="false"
+        autocomplete="off"
+        aria-describedby="queryHint"
+      ></textarea>
+      <p id="queryHint" class="query-hint"></p>
+
+      <button class="submit-btn" id="submitBtn"></button>
+    </section>
+  </main>
+
+  <div
+    class="modal-backdrop"
+    id="modalBackdrop"
+    aria-hidden="true"
+    role="dialog"
+    aria-modal="true"
+    aria-labelledby="modalHeading"
+  >
+    <div class="modal">
+      <h2 class="sr-only" id="modalHeading"></h2>
+      <button class="modal-close" id="modalCloseBtn">×</button>
+      <pre class="modal-content" id="modalContent" tabindex="0"></pre>
     </div>
   </div>
 
+  <!--
+    en.js must be loaded before script.js so that LANG_EN is defined
+    globally by the time I18nService runs inside init().
+  -->
+  <script src="lang/en/en.js"></script>
   <script src="script.js"></script>
 </body>
 </html>
